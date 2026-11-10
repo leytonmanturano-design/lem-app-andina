@@ -2,17 +2,26 @@
 const http = require('http');
 const VERSION = '2.0';
 
+const products = [
+  {name:'Quinua Andina',category:'Alimentos',price:18,image:'https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=600',description:'Quinua seleccionada, ideal para tus comidas.'},
+  {name:'Miel Natural',category:'Naturales',price:25,image:'https://images.unsplash.com/photo-1587049352851-8d4e89133924?w=600',description:'Dulzura natural para acompañar tus días.'},
+  {name:'Café Peruano',category:'Bebidas',price:28,image:'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=600',description:'Aroma y sabor para disfrutar cada mañana.'},
+  {name:'Chocolate Artesanal',category:'Alimentos',price:15,image:'https://images.unsplash.com/photo-1548907040-4d42f2b9f5a2?w=600',description:'Un delicioso antojo para cualquier momento.'},
+  {name:'Frutos Secos',category:'Naturales',price:20,image:'https://images.unsplash.com/photo-1608797178974-15b35a64ede9?w=600',description:'Una opción práctica para tus meriendas.'},
+  {name:'Infusión Andina',category:'Bebidas',price:12,image:'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600',description:'Una bebida reconfortante para compartir.'}
+];
+
 const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Andina Market | Productos que nos conectan</title>
+<title>Andina Market | Tienda Online</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;color:#26352d;background:#fafaf7}
 header{background:#173d2b;color:white;padding:17px 7%;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
-.logo{font-size:25px;font-weight:800;letter-spacing:.5px}
+.logo{font-size:25px;font-weight:800}
 .logo span{color:#e9bd63}
 nav{display:flex;gap:22px;align-items:center}
 nav a{color:white;text-decoration:none;font-size:14px}
@@ -55,110 +64,152 @@ section{padding:55px 7%}
 footer{background:#173d2b;color:#dce8dc;padding:35px 7%;text-align:center;line-height:1.9}
 footer strong{color:#e9bd63}
 #toast{position:fixed;bottom:20px;right:20px;background:#173d2b;color:white;padding:14px 20px;border-radius:10px;display:none;z-index:5}
-@media(max-width:650px){header{justify-content:center}nav{order:3;width:100%;justify-content:center}.hero{padding:65px 7%}.about{grid-template-columns:1fr}.benefits{grid-template-columns:1fr}.section-title h2{font-size:27px}}
+@media(max-width:650px){
+header{justify-content:center}
+nav{order:3;width:100%;justify-content:center}
+.hero{padding:65px 7%}
+.about{grid-template-columns:1fr}
+.benefits{grid-template-columns:1fr}
+.section-title h2{font-size:27px}
+}
 </style>
 </head>
 <body>
 <header>
- <div class="logo">ANDINA <span>MARKET</span></div>
- <nav><a href="#inicio">Inicio</a><a href="#productos">Productos</a><a href="#nosotros">Nosotros</a></nav>
- <button class="cart" onclick="checkout()">🛒 Mi pedido (<span id="count">0</span>)</button>
+<div class="logo">ANDINA <span>MARKET</span></div>
+<nav>
+<a href="#inicio">Inicio</a>
+<a href="#productos">Productos</a>
+<a href="#nosotros">Nosotros</a>
+</nav>
+<button class="cart" onclick="checkout()">🛒 Mi pedido (<span id="count">0</span>)</button>
 </header>
 
 <div class="hero" id="inicio">
- <div class="hero-content">
-  <small>CALIDAD QUE VIENE DE NUESTRA TIERRA</small>
-  <h1>Lo mejor de los Andes, cerca de ti.</h1>
-  <p>Descubre productos seleccionados con tradición, calidad y el auténtico sabor del Perú.</p>
-  <a class="cta" href="#productos">Explorar productos →</a>
- </div>
+<div class="hero-content">
+<small>CALIDAD QUE VIENE DE NUESTRA TIERRA</small>
+<h1>Lo mejor de los Andes, cerca de ti.</h1>
+<p>Descubre productos seleccionados con tradición, calidad y el auténtico sabor del Perú.</p>
+<a class="cta" href="#productos">Explorar productos →</a>
+</div>
 </div>
 
 <section id="productos">
- <div class="section-title"><small>NUESTRO CATÁLOGO</small><h2>Descubre nuestros productos</h2></div>
- <input class="search" id="search" placeholder="🔎 Buscar un producto..." oninput="renderProducts()">
- <div class="categories">
-  <button class="active" onclick="setCategory('Todos',this)">Todos</button>
-  <button onclick="setCategory('Alimentos',this)">Alimentos</button>
-  <button onclick="setCategory('Bebidas',this)">Bebidas</button>
-  <button onclick="setCategory('Naturales',this)">Naturales</button>
- </div>
- <div class="products" id="products"></div>
+<div class="section-title">
+<small>NUESTRO CATÁLOGO</small>
+<h2>Descubre nuestros productos</h2>
+</div>
+<input class="search" id="search" placeholder="🔎 Buscar un producto..." oninput="renderProducts()">
+<div class="categories">
+<button class="active" onclick="setCategory('Todos',this)">Todos</button>
+<button onclick="setCategory('Alimentos',this)">Alimentos</button>
+<button onclick="setCategory('Bebidas',this)">Bebidas</button>
+<button onclick="setCategory('Naturales',this)">Naturales</button>
+</div>
+<div class="products" id="products"></div>
 </section>
 
 <section class="about" id="nosotros">
- <img src="https://images.unsplash.com/photo-1472396961693-142e6e269027?w=900" alt="Naturaleza andina">
- <div><small style="color:#a87932;font-weight:bold;letter-spacing:2px">SOMOS ANDINA MARKET</small>
- <h2>Tradición, calidad y confianza.</h2>
- <p>En Andina Market queremos acercarte a productos que representan lo mejor de nuestra tierra. Trabajamos para ofrecerte una experiencia de compra sencilla, cercana y confiable.</p>
- <a class="cta" href="#productos">Ver catálogo</a></div>
+<img src="https://images.unsplash.com/photo-1472396961693-142e6e269027?w=900" alt="Naturaleza">
+<div>
+<small style="color:#a87932;font-weight:bold;letter-spacing:2px">SOMOS ANDINA MARKET</small>
+<h2>Tradición, calidad y confianza.</h2>
+<p>En Andina Market queremos acercarte a productos que representan lo mejor de nuestra tierra. Trabajamos para ofrecerte una experiencia de compra sencilla, cercana y confiable.</p>
+<a class="cta" href="#productos">Ver catálogo</a>
+</div>
 </section>
 
 <section>
- <div class="section-title"><small>¿POR QUÉ ELEGIRNOS?</small><h2>Una compra sencilla y segura</h2></div>
- <div class="benefits">
-  <div class="benefit"><div class="emoji">🌱</div><h3>Calidad seleccionada</h3><p>Productos elegidos pensando en nuestros clientes.</p></div>
-  <div class="benefit"><div class="emoji">🚚</div><h3>Atención cercana</h3><p>Coordina tu pedido directamente con nuestro equipo.</p></div>
-  <div class="benefit"><div class="emoji">💚</div><h3>Orgullo peruano</h3><p>Una propuesta inspirada en la riqueza de nuestra tierra.</p></div>
- </div>
+<div class="section-title">
+<small>¿POR QUÉ ELEGIRNOS?</small>
+<h2>Una compra sencilla y segura</h2>
+</div>
+<div class="benefits">
+<div class="benefit"><div class="emoji">🌱</div><h3>Calidad seleccionada</h3><p>Productos elegidos pensando en nuestros clientes.</p></div>
+<div class="benefit"><div class="emoji">🚚</div><h3>Atención cercana</h3><p>Coordina tu pedido directamente con nuestro equipo.</p></div>
+<div class="benefit"><div class="emoji">💚</div><h3>Orgullo peruano</h3><p>Una propuesta inspirada en la riqueza de nuestra tierra.</p></div>
+</div>
 </section>
 
 <footer>
- <div class="logo">ANDINA <span>MARKET</span></div>
- <p>Productos que nos conectan con lo nuestro.</p>
- <p>© 2026 Andina Market. Todos los derechos reservados.</p>
- <small>Versión ${VERSION}</small>
+<div class="logo">ANDINA <span>MARKET</span></div>
+<p>Productos que nos conectan con lo nuestro.</p>
+<p>© 2026 Andina Market. Todos los derechos reservados.</p>
+<small>Versión ${VERSION}</small>
 </footer>
 <div id="toast"></div>
 
 <script>
-const products = [
- {name:'Quinua Andina',category:'Alimentos',price:18,image:'https://images.unsplash.com/photo-1515543904379-3d757afe72e4?w=600',description:'Quinua seleccionada, ideal para tus comidas.'},
- {name:'Miel Natural',category:'Naturales',price:25,image:'https://images.unsplash.com/photo-1587049352851-8d4e89133924?w=600',description:'Dulzura natural para acompañar tus días.'},
- {name:'Café Peruano',category:'Bebidas',price:28,image:'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=600',description:'Aroma y sabor para disfrutar cada mañana.'},
- {name:'Chocolate Artesanal',category:'Alimentos',price:15,image:'https://images.unsplash.com/photo-1548907040-4d42f2b9f5a2?w=600',description:'Un delicioso antojo para cualquier momento.'},
- {name:'Frutos Secos',category:'Naturales',price:20,image:'https://images.unsplash.com/photo-1608797178974-15b35a64ede9?w=600',description:'Una opción práctica para tus meriendas.'},
- {name:'Infusión Andina',category:'Bebidas',price:12,image:'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600',description:'Una bebida reconfortante para compartir.'}
-];
-let category='Todos';
-let cart=[];
+const products = ${JSON.stringify(products)};
+let category = 'Todos';
+let cart = [];
+
 function renderProducts(){
- const term=document.getElementById('search').value.toLowerCase();
- const filtered=products.filter(p=>(category==='Todos'||p.category===category)&&p.name.toLowerCase().includes(term));
- const container=document.getElementById('products');
- if(!filtered.length){container.innerHTML='<div class="empty">No encontramos productos con esa búsqueda.</div>';return;}
- container.innerHTML=filtered.map(p=>'<article class="product"><img src="'+p.image+'" alt="'+p.name+'"><div class="product-info"><span class="tag">'+p.category+'</span><h3>'+p.name+'</h3><p>'+p.description+'</p><div class="price">S/ '+p.price.toFixed(2)+'</div><button class="add" onclick="addToCart(\\''+p.name+'\\')">Agregar al pedido +</button></div></article>').join('');
+const term = document.getElementById('search').value.toLowerCase();
+const filtered = products.filter(p =>
+(category === 'Todos' || p.category === category) &&
+p.name.toLowerCase().includes(term)
+);
+const container = document.getElementById('products');
+if(!filtered.length){
+container.innerHTML = '<div class="empty">No encontramos productos con esa búsqueda.</div>';
+return;
 }
+container.innerHTML = filtered.map((p,i) => \`
+<article class="product">
+<img src="\${p.image}" alt="\${p.name}">
+<div class="product-info">
+<span class="tag">\${p.category}</span>
+<h3>\${p.name}</h3>
+<p>\${p.description}</p>
+<div class="price">S/ \${p.price.toFixed(2)}</div>
+<button class="add" onclick="addToCart(\${products.indexOf(p)})">Agregar al pedido +</button>
+</div>
+</article>
+\`).join('');
+}
+
 function setCategory(value,button){
- category=value;
- document.querySelectorAll('.categories button').forEach(b=>b.classList.remove('active'));
- button.classList.add('active');
- renderProducts();
+category = value;
+document.querySelectorAll('.categories button').forEach(b=>b.classList.remove('active'));
+button.classList.add('active');
+renderProducts();
 }
-function addToCart(name){
- const item=products.find(p=>p.name===name);
- cart.push(item);
- document.getElementById('count').textContent=cart.length;
- const toast=document.getElementById('toast');
- toast.textContent='¡'+name+' agregado a tu pedido!';
- toast.style.display='block';
- setTimeout(()=>toast.style.display='none',2200);
+
+function addToCart(index){
+cart.push(products[index]);
+document.getElementById('count').textContent = cart.length;
+const toast = document.getElementById('toast');
+toast.textContent = '¡Producto agregado a tu pedido!';
+toast.style.display = 'block';
+setTimeout(()=>toast.style.display='none',2200);
 }
+
 function checkout(){
- if(!cart.length){alert('Tu pedido está vacío. Agrega algún producto primero.');return;}
- let message='Hola, Andina Market. Quiero realizar este pedido:%0A';
- let total=0;
- cart.forEach(p=>{message+='%E2%80%A2 '+encodeURIComponent(p.name)+' - S/ '+p.price.toFixed(2)+'%0A';total+=p.price;});
- message+='%0ATotal: S/ '+total.toFixed(2);
- // Reemplaza este número por el WhatsApp de tu empresa, con código de país.
- window.open('https://wa.me/51999999999?text='+message,'_blank');
+if(!cart.length){
+alert('Tu pedido está vacío. Agrega algún producto primero.');
+return;
 }
+let message = 'Hola, Andina Market. Quiero realizar este pedido:\\n';
+let total = 0;
+cart.forEach(p=>{
+message += '• ' + p.name + ' - S/ ' + p.price.toFixed(2) + '\\n';
+total += p.price;
+});
+message += '\\nTotal: S/ ' + total.toFixed(2);
+
+// CAMBIA ESTE NUMERO POR EL WHATSAPP DE TU EMPRESA
+const whatsapp = '51999999999';
+
+window.open('https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(message),'_blank');
+}
+
 renderProducts();
 </script>
 </body>
 </html>`;
 
 http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+  res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
   res.end(html);
 }).listen(3000);
